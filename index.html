@@ -406,15 +406,27 @@ const DRIVE_FILE="generator_state.json";
 const SCOPE="https://www.googleapis.com/auth/drive.appdata";
 let tokenClient=null,accessToken=null,driveFileId=null;
 
+let pendingInteractive=false;
 function initGis(){
   if(!window.google||!google.accounts||!google.accounts.oauth2){setTimeout(initGis,400);return;}
   if(GOOGLE_CLIENT_ID.startsWith("PASTE_")){setStatus("Drive: クライアントID未設定（⚙Google設定）");return;}
   tokenClient=google.accounts.oauth2.initTokenClient({client_id:GOOGLE_CLIENT_ID,scope:SCOPE,
-    callback:resp=>{if(resp&&resp.access_token){accessToken=resp.access_token;onSignedIn();}}});
+    callback:resp=>{if(resp&&resp.access_token){accessToken=resp.access_token;localStorage.setItem("gauthed","1");pendingInteractive=false;onSignedIn();}},
+    error_callback:err=>{
+      // 静かなログインが失敗 → 必要なときだけ同意画面（＝警告）を出す
+      if(pendingInteractive){pendingInteractive=false;tokenClient.requestAccessToken({prompt:"consent"});}
+      else setStatus("Drive: ログインしてください");
+    }});
   setStatus("Drive: 未接続");
+  // 一度ログイン済みなら、ページを開いた時に裏で静かに再ログイン（警告なし）
+  if(localStorage.getItem("gauthed")==="1"){setStatus("Drive: 自動ログイン中…");tokenClient.requestAccessToken({prompt:""});}
 }
-function signIn(){if(!tokenClient){initGis();if(!tokenClient){alert("クライアントIDを先に設定してください（⚙Google設定）");return;}}tokenClient.requestAccessToken({prompt:accessToken?"":"consent"});}
-function signOut(){if(accessToken&&google.accounts.oauth2)google.accounts.oauth2.revoke(accessToken,()=>{});accessToken=null;driveFileId=null;document.getElementById("signinBtn").style.display="inline-block";document.getElementById("syncBtn").style.display="none";document.getElementById("signoutBtn").style.display="none";setStatus("Drive: 未接続");}
+function signIn(){
+  if(!tokenClient){initGis();if(!tokenClient){alert("クライアントIDを先に設定してください（⚙Google設定）");return;}}
+  pendingInteractive=true;                 // まず静かに試し、ダメなときだけ同意画面へ
+  tokenClient.requestAccessToken({prompt:""});
+}
+function signOut(){if(accessToken&&google.accounts.oauth2)google.accounts.oauth2.revoke(accessToken,()=>{});accessToken=null;driveFileId=null;localStorage.removeItem("gauthed");document.getElementById("signinBtn").style.display="inline-block";document.getElementById("syncBtn").style.display="none";document.getElementById("signoutBtn").style.display="none";setStatus("Drive: 未接続");}
 function onSignedIn(){document.getElementById("signinBtn").style.display="none";document.getElementById("syncBtn").style.display="inline-block";document.getElementById("signoutBtn").style.display="inline-block";setStatus("Drive: 接続中… 読込");driveLoad();}
 function setStatus(s){document.getElementById("syncStatus").innerHTML=s.replace(/接続済|同期済/,m=>"<b>"+m+"</b>");}
 
