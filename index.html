@@ -134,6 +134,18 @@ textarea:focus{outline:none;border-color:#1D9E75;}
 </details>
 
 <details class="acc">
+  <summary>🔍 保存データの確認・書き出し（バックアップ）</summary>
+  <div class="inner">
+    <p class="tip">Driveに保存されている中身（プロジェクト別の追加コンテキスト・取り込みファイル・下書き）です。バックアップとして保存できます。</p>
+    <div class="btn-row" style="margin-bottom:8px;">
+      <button class="minibtn" onclick="showState()">中身を表示</button>
+      <button class="minibtn" onclick="downloadState()">⬇ JSONでダウンロード</button>
+    </div>
+    <textarea id="stateBox" rows="10" readonly style="display:none;background:#fafaf8;font-family:monospace;font-size:11px;"></textarea>
+  </div>
+</details>
+
+<details class="acc">
   <summary>⚙ Google設定（クライアントID）</summary>
   <div class="inner">
     <p class="tip">Google CloudのOAuthクライアントIDを貼り付け（手順書参照）。HTMLに直接書いてあれば不要。</p>
@@ -377,6 +389,15 @@ function flash(sel,a,b){const el=document.querySelector(sel);if(!el)return;el.te
 function saveDraft(){if(!lastOut)return;state.drafts.push({id:"d"+Date.now(),proj:curProj,label:lastLabel,text:lastOut,ts:Date.now()});touch();renderDrafts();flash(".save-btn","💾 下書き保存","保存しました");}
 function copyDraft(id){const d=state.drafts.find(x=>x.id===id);if(d)navigator.clipboard.writeText(d.text);}
 function delDraft(id){state.drafts=state.drafts.filter(x=>x.id!==id);touch();renderDrafts();}
+
+/* ---- 保存データの確認・書き出し ---- */
+function showState(){const b=document.getElementById("stateBox");b.style.display="block";b.value=JSON.stringify(state,null,2);}
+function downloadState(){
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob);const a=document.createElement("a");
+  a.href=url;a.download="generator_state_"+new Date().toISOString().slice(0,10)+".json";
+  document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+}
 
 /* ====================================================================
    ⑥ Google Drive 同期（appDataFolder・最小権限）
