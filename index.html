@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>投稿ジェネレーター（LAKE VIBES / 琉球國祭り太鼓 滋賀支部）</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f0;padding:20px;color:#1a1a18;max-width:680px;margin:0 auto;}
+h1{font-size:17px;font-weight:600;margin-bottom:2px;}
+.sub{font-size:12px;color:#888;margin-bottom:16px;}
+.section-label{font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.06em;margin:0 0 8px;}
+.bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#fff;border:1px solid #e0e0d8;border-radius:10px;padding:8px 10px;margin-bottom:16px;}
+.bar .status{font-size:12px;color:#888;flex:1;min-width:120px;}
+.bar .status b{color:#0F6E56;}
+.minibtn{cursor:pointer;border:1px solid #e0e0d8;border-radius:8px;background:#f5f5f0;font-size:12px;padding:6px 12px;color:#444;}
+.minibtn:hover{border-color:#aaa;}
+.minibtn.primary{background:#0F6E56;color:#fff;border:none;}
+.minibtn.primary:hover{background:#085041;}
+.projtabs{display:flex;gap:8px;margin-bottom:16px;}
+.projtab{flex:1;cursor:pointer;border:1px solid #e0e0d8;border-radius:10px;padding:10px;background:#fff;font-size:13px;font-weight:600;color:#666;transition:all .15s;text-align:center;}
+.projtab.active{border:2px solid #0F6E56;background:#E1F5EE;color:#0F6E56;}
+.mode-row{display:flex;gap:8px;margin-bottom:18px;}
+.mode-btn{flex:1;cursor:pointer;border:1px solid #e0e0d8;border-radius:8px;padding:9px;background:#fff;font-size:12px;color:#666;}
+.mode-btn.active{border:2px solid #0F6E56;background:#E1F5EE;color:#0F6E56;font-weight:600;}
+.personas{display:grid;grid-template-columns:repeat(auto-fit,minmax(95px,1fr));gap:8px;margin-bottom:18px;}
+.persona-btn{cursor:pointer;border:1px solid #e0e0d8;border-radius:12px;padding:10px 8px;background:#fff;display:flex;flex-direction:column;gap:3px;text-align:left;}
+.persona-btn.active{border:2px solid #1D9E75;}
+.persona-emoji{font-size:20px;}.persona-name{font-size:12px;font-weight:600;}.persona-short{font-size:10px;color:#999;}
+.themes{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;}
+.theme-btn{cursor:pointer;border:1px solid #e0e0d8;border-radius:100px;padding:6px 14px;background:#fff;font-size:12px;color:#666;}
+.theme-btn.selected{border-color:#1D9E75;background:#E1F5EE;color:#0F6E56;font-weight:600;}
+textarea{width:100%;border:1px solid #e0e0d8;border-radius:8px;padding:10px 12px;font-size:13px;resize:vertical;font-family:inherit;background:#fff;color:#1a1a18;margin-bottom:12px;}
+textarea:focus{outline:none;border-color:#1D9E75;}
+.btn-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.gen-btn{cursor:pointer;border:none;border-radius:8px;padding:11px 22px;background:#0F6E56;color:#fff;font-size:14px;font-weight:600;}
+.gen-btn:hover{background:#085041;}
+.regen-btn,.save-btn{cursor:pointer;border:1px solid #0F6E56;border-radius:8px;padding:10px 16px;background:#fff;color:#0F6E56;font-size:13px;font-weight:500;}
+.regen-btn:hover,.save-btn:hover{background:#E1F5EE;}
+.output-wrap{margin-top:20px;border:1px solid #e0e0d8;border-radius:12px;background:#fff;padding:16px;}
+.output-label{font-size:12px;color:#888;margin-bottom:10px;}
+.output-text{font-size:14px;line-height:1.9;white-space:pre-wrap;}
+.foot-row{display:flex;justify-content:space-between;align-items:center;margin-top:14px;flex-wrap:wrap;gap:8px;}
+.copy-btn{cursor:pointer;border:1px solid #e0e0d8;border-radius:8px;padding:8px 18px;background:#f5f5f0;font-size:12px;color:#666;}
+.charcount{font-size:11px;color:#aaa;}.charcount.over{color:#c0392b;font-weight:600;}
+.drop{border:2px dashed #cfcfc4;border-radius:10px;padding:14px;text-align:center;color:#999;font-size:12px;background:#fafaf8;cursor:pointer;margin-bottom:10px;line-height:1.6;}
+.drop.drag{border-color:#1D9E75;background:#E1F5EE;color:#0F6E56;}
+.filelist{display:flex;flex-direction:column;gap:6px;margin-bottom:6px;}
+.fileitem{display:flex;align-items:center;gap:8px;border:1px solid #e0e0d8;border-radius:8px;padding:7px 10px;background:#fff;font-size:12px;}
+.fileitem .fn{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.fileitem .sz{color:#aaa;font-size:11px;white-space:nowrap;}
+.fileitem button{cursor:pointer;border:1px solid #e0e0d8;border-radius:6px;background:#f5f5f0;font-size:11px;padding:3px 8px;color:#666;}
+.draftlist{display:flex;flex-direction:column;gap:8px;}
+.draftitem{border:1px solid #e0e0d8;border-radius:10px;background:#fff;padding:10px 12px;font-size:12px;}
+.draftitem .dmeta{color:#999;font-size:11px;margin-bottom:5px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+.draftitem .dtext{white-space:pre-wrap;line-height:1.7;color:#333;max-height:120px;overflow:auto;}
+.draftitem .drow{display:flex;gap:6px;margin-top:8px;}
+.draftitem button{cursor:pointer;border:1px solid #e0e0d8;border-radius:6px;background:#f5f5f0;font-size:11px;padding:4px 10px;color:#555;}
+.acc{margin:6px 0 16px;}
+.acc summary{cursor:pointer;font-size:12px;color:#888;}
+.acc .inner{margin-top:8px;}
+.tip{font-size:11px;color:#aaa;margin-top:6px;line-height:1.6;}
+.note{font-size:11px;color:#aaa;margin-bottom:16px;line-height:1.6;}
+.cid-input{width:100%;border:1px solid #e0e0d8;border-radius:8px;padding:8px 10px;font-size:12px;font-family:monospace;margin-bottom:8px;}
+</style>
+</head>
+<body>
+<h1>投稿ジェネレーター</h1>
+<p class="sub">キャラ × テーマで完成文を生成。コンテキストと下書きは Google Drive で全端末同期。</p>
+
+<!-- Google Drive 同期バー -->
+<div class="bar">
+  <span class="status" id="syncStatus">Drive: 未接続</span>
+  <button class="minibtn primary" id="signinBtn" onclick="signIn()">Googleでログイン</button>
+  <button class="minibtn" id="syncBtn" onclick="syncNow()" style="display:none;">今すぐ同期</button>
+  <button class="minibtn" id="signoutBtn" onclick="signOut()" style="display:none;">ログアウト</button>
+</div>
+
+<!-- プロジェクト切替 -->
+<p class="section-label">プロジェクト</p>
+<div class="projtabs" id="projtabs"></div>
+
+<p class="section-label">生成モード</p>
+<div class="mode-row" id="modeRow">
+  <button class="mode-btn active" data-mode="instant" onclick="setMode('instant')">⚡ 即生成</button>
+  <button class="mode-btn" data-mode="claude" onclick="setMode('claude')">🤖 Claudeプロンプト</button>
+</div>
+
+<p class="section-label">投稿者キャラクター</p>
+<div class="personas" id="personas"></div>
+
+<p class="section-label">投稿テーマ</p>
+<div class="themes" id="themes"></div>
+
+<p class="section-label">メモ（任意・今回限り）</p>
+<textarea id="memo" rows="2" placeholder="今日あったこと、出演団体名、日付・会場… 空白でもOK"></textarea>
+
+<details class="acc">
+  <summary>📚 このプロジェクトの追加コンテキスト（編集＝Drive同期されます）</summary>
+  <div class="inner">
+    <p class="tip">ここに書いた内容は背景情報として使われ、Driveで全端末に同期されます。スマホで書いてPCで使う、が可能。</p>
+    <textarea id="extraCtx" rows="4" placeholder="例）出演決定団体、協賛の最新状況、次回イベントの詳細…"></textarea>
+    <p class="section-label">追加ファイル（MD / TXT）</p>
+    <div class="drop" id="drop">📄 MD/TXTをドラッグ＆ドロップ、またはクリックで選択</div>
+    <input type="file" id="fileInput" accept=".md,.markdown,.txt" multiple style="display:none;">
+    <div class="filelist" id="fileList"></div>
+    <p class="tip">追加情報は「🤖 Claudeプロンプト」でフル活用。即生成で使う時は「メモに入れる」。</p>
+    <button class="minibtn" onclick="toggleCtx()">合体コンテキストを確認 ▾</button>
+    <textarea id="ctxBox" rows="6" readonly style="display:none;margin-top:8px;background:#fafaf8;font-family:monospace;font-size:11px;"></textarea>
+  </div>
+</details>
+
+<div class="btn-row">
+  <button class="gen-btn" onclick="generate()">投稿文を生成する</button>
+  <button class="regen-btn" id="regenBtn" onclick="generate()" style="display:none;">🔁 別パターン</button>
+</div>
+
+<div id="outputWrap" class="output-wrap" style="display:none;">
+  <p class="output-label" id="outputLabel"></p>
+  <p class="output-text" id="outputText"></p>
+  <div class="foot-row">
+    <div style="display:flex;gap:8px;">
+      <button class="copy-btn" onclick="copyText()">コピー</button>
+      <button class="save-btn" onclick="saveDraft()">💾 下書き保存</button>
+    </div>
+    <span class="charcount" id="charCount"></span>
+  </div>
+</div>
+
+<details class="acc" style="margin-top:18px;">
+  <summary>🗂 下書き一覧（<span id="draftCount">0</span>件・Drive同期）</summary>
+  <div class="inner"><div class="draftlist" id="draftList"></div></div>
+</details>
+
+<details class="acc">
+  <summary>⚙ Google設定（クライアントID）</summary>
+  <div class="inner">
+    <p class="tip">Google CloudのOAuthクライアントIDを貼り付け（手順書参照）。HTMLに直接書いてあれば不要。</p>
+    <input class="cid-input" id="cidInput" placeholder="xxxxx.apps.googleusercontent.com">
+    <button class="minibtn" onclick="saveCid()">保存</button>
+  </div>
+</details>
+
+<p class="note" id="bottomNote"></p>
+
+<script>
+/* ====================================================================
+   ① Google クライアントID
+   GitHub Pages 等に上げる場合は、ここに自分のクライアントIDを書くと
+   全端末で使えます（このIDは秘密情報ではありません）。
+   空のままでも、画面下「⚙ Google設定」から端末ごとに登録できます。
+==================================================================== */
+let GOOGLE_CLIENT_ID = "PASTE_YOUR_CLIENT_ID_HERE.apps.googleusercontent.com";
+(function(){const o=localStorage.getItem("gcid"); if(o) GOOGLE_CLIENT_ID=o;})();
+
+/* ====================================================================
+   ② プロジェクト定義（LAKE VIBES / 琉球國祭り太鼓 滋賀支部）
+==================================================================== */
+const EVENT_DATE=new Date(2026,9,18);
+function daysLeft(){const t=new Date();t.setHours(0,0,0,0);return Math.max(0,Math.round((EVENT_DATE-t)/86400000));}
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+const PROJECTS={
+ lakevibes:{
+  name:"🌊 LAKE VIBES",
+  context:`■ 基本情報
+イベント名: LAKE VIBES Vol.02 / 開催: 2026年10月18日(日) / 会場: はつらつドーム(滋賀県愛荘町)
+入場無料・出演料なし / 目標来場500名 / 主催: LAKE VIBES実行委員会(委員長 加藤高志)
+■ Vol.01実績: 2025/11/2 草津・約300名・7団体(アクアレーラ/てんびん太鼓塾/湖鼓Ro 他)
+■ 会場: 屋内で雨天決行・PA無料・アルコールOK・キッチンカー/マルシェ・駐車場あり
+■ ジャンル: 創作エイサー/和太鼓/バンド/よさこい/サンバ/タヒチアン/フラメンコ（ごちゃまぜ）
+■ 協賛: 個人1口1,000円〜(パンフに名前掲載)
+■ 理念: 誰でもフラッと来れる/ジャンルの壁がない場所。将来は竜王ドラゴンハット(5,000人)も視野`,
+  tagBase:["#LAKEVIBES","#LAKEVIBES2026","#滋賀"],
+  tagPool:["#愛荘町","#はつらつドーム","#滋賀イベント","#和太鼓","#創作エイサー","#よさこい","#琵琶湖","#お祭り"],
+  personas:[
+   {emoji:"🔥",name:"たかし",short:"委員長",system:"「たかし」=熱い実行委員長。俺たち/やるぞ系。荒削りで情熱的、敬語なし。3〜6行、ハッシュタグ3〜5個。",
+    voice:{open:["よし、今日も告知いくぞ。","正直に言う。","俺たちLAKE VIBES、本気でやってます。","さて。"],close:["絶対やり切る。一緒に来てくれ。","現場で待ってる。","この熱、届け。","やるぞ、Vol.02。"],emo:["🔥","💪","🔥🔥","⚡"]}},
+   {emoji:"🌸",name:"さっちゃん",short:"地元のおかん",system:"「さっちゃん」=滋賀の30代後半お母さん。〜よ/〜かな。ほっこり、敬語なし。3〜5行、タグ3〜5個。",
+    voice:{open:["こんにちは〜","ねぇ、聞いてほしいことがあるの。","今日もおつかれさま","最近ね、"],close:["気軽に来てくれたら嬉しいな","家族みんなで来てね〜","ふらっとで大丈夫だからね。","待ってるよ〜"],emo:["🌸","☺️","🍙","🌿"]}},
+   {emoji:"🎵",name:"けんじ",short:"フェス好き",system:"「けんじ」=20代後半フェス好き。エモい/やばい/激アツ。テンション高め。4〜6行、タグ4〜6個。",
+    voice:{open:["やばい、これは告知せなあかんやつ。","ガチで来る、これ。","エモい話していい？","告知させて！"],close:["まじで来て！一緒に盛り上がろ","これは見逃すな！","当日、最前で待ってる","激アツだから、ほんと来て！"],emo:["🎵","🔥","🤘","✨"]}},
+   {emoji:"🏔️",name:"まっちゃん",short:"滋賀愛",system:"「まっちゃん」=50代滋賀のおじさん。〜やな/〜やろの関西弁。地域愛。3〜5行、タグ3〜4個。",
+    voice:{open:["どうも、まっちゃんです。","いやー、ええ天気やなぁ。","ちょっと聞いてや。","滋賀のみんな〜"],close:["ほんま来てな〜","楽しみにしとるで。","よろしゅう頼むわ〜","待っとるさかいな。"],emo:["🏔️","😊","🍵","🌅"]}},
+   {emoji:"🌊",name:"りな",short:"ゆる系",system:"「りな」=20代ゆる系。〜って感じ/なんか。自然体。3〜4行、タグ3〜4個。",
+    voice:{open:["なんか、","ふらっと告知〜","最近ね、","気づいたら、"],close:["気が向いたら来てみて〜","ゆるっとお待ちしてます〜","のぞいてみてね","来れたらでいいからね〜"],emo:["🌊","✨","☁️","🫧"]}}
+  ],
+  themes:[
+   {id:"countdown",label:"📅 カウントダウン",prompt:"Vol.02のカウントダウン。開催まで約{D}日。日付・会場名を入れて。",tags:["#カウントダウン","#10月18日"],
+    body:["10月18日（日）、いよいよLAKE VIBES Vol.02。\n会場は愛荘町のはつらつドーム。開催まであと{D}日になりました。","気づけば本番まであと{D}日。\n10/18(日)、はつらつドーム（愛荘町）で待ってます。","LAKE VIBES Vol.02まで、のこり{D}日。\n10月18日（日）・はつらつドーム。今年は屋内だから雨でも開催です。"]},
+   {id:"purpose",label:"💡 意義",prompt:"無料・ジャンルを超えた交流の理念を説教くさくなく。",tags:["#ジャンルを超えて","#入場無料"],
+    body:["LAKE VIBESは入場無料、出演料もなし。\nエイサーも和太鼓もバンドもフラメンコも、最初からジャンルの壁がない。そんな場所を作りたくてやってます。","上手いとか有名とか関係なく、いろんな表現がごちゃまぜになる一日。\n誰でもフラッと来れる場所にしたいんです。","国もジャンルも超えて、ただ「いいな」が集まる場所。\nそれがLAKE VIBESのやりたいことです。"]},
+   {id:"free",label:"🎫 無料の理由",prompt:"なぜ入場・出演無料か、その想いを自然に。",tags:["#入場無料","#滋賀イベント"],
+    body:["なんで入場無料で、出演料もなしなのか。\nお金のあるなしで来れない人を作りたくない。それだけなんです。","「無料って大丈夫？」ってよく聞かれます。\nでも、まずは気軽に文化に触れてほしい。入口は広いほどいいと思ってます。","入場無料・出演料なしは、こだわりです。\n損得じゃなくて、共感で集まれる場所にしたいから。"]},
+   {id:"prep",label:"🔧 準備中",prompt:"準備中のリアル（協賛集め・出演募集・チラシ配り）。",tags:["#準備中","#協賛募集"],
+    body:["今は協賛集めと出演団体の募集まっただ中。\nチラシを配ったり、頭を下げたり。地味だけど、これが一番大事な時間です。","裏側はほんと地道です。\n協賛のお願い、出演団体さんとのやりとり、会場の段取り…一個ずつ進めてます。","準備、進んでます。\n出演団体も少しずつ決まってきて、当日が楽しみになってきました。"]},
+   {id:"vol01",label:"📸 前回",prompt:"Vol.01(2025/11/2 草津・7団体・約300名)の思い出。団体名1〜2個OK。",tags:["#思い出","#草津"],
+    body:["去年のVol.01は、草津の大はらっぱ広場に約300名。\n7団体が出てくれて、ジャンルバラバラなのに一体感がすごかった。","思い返すとVol.01（2025年11月・草津）、本当にいい一日でした。\n約300名、7団体。あの空気をもう一回、もっと大きく。","Vol.01で出てくれたのは、アクアレーラ、てんびん太鼓塾、湖鼓Roほか7団体。\nあのごちゃまぜ感が忘れられなくて、Vol.02やります。"]},
+   {id:"performer",label:"🎭 出演団体",prompt:"多彩なジャンルの出演の魅力。具体名OK。",tags:["#和太鼓","#創作エイサー","#よさこい","#フラメンコ"],
+    body:["創作エイサー、和太鼓、バンド、よさこい、サンバ、タヒチアン、フラメンコ…\nジャンルがバラバラな出演者が、同じ舞台に立ちます。","和太鼓の隣でフラメンコ、その隣でサンバ。\nこんな並び、なかなか無いと思う。LAKE VIBESならではです。","出演団体、続々決まってきてます。\n国もジャンルも超えた顔ぶれ。当日のステージ、楽しみにしててください。"]},
+   {id:"sponsor",label:"🤝 協賛募集",prompt:"個人協賛(1口1,000円〜・名前掲載)。共感で参加できる雰囲気で。",tags:["#協賛募集","#個人協賛"],
+    body:["実はいま、個人協賛を募集しています。\n1口1,000円から、パンフレットにお名前を載せさせてもらいます。","「応援したいよ」って人へ。個人協賛という形があります。\n1口1,000円〜。金額より、一緒に作る仲間になってもらえたら嬉しいです。","このイベント、たくさんの人の支えで成り立ってます。\n個人協賛(1口1,000円〜)、もしよかったら力を貸してください。"]},
+   {id:"venue",label:"🏟️ 会場",prompt:"はつらつドーム(屋内・雨天OK・酒OK・駐車場)の紹介。",tags:["#はつらつドーム","#愛荘町","#雨天決行"],
+    body:["今年の会場、はつらつドーム（愛荘町）は屋内。\nだから雨でも開催確定。お酒もOKになって、外にはキッチンカーやマルシェも出ます。","会場がパワーアップしました。\n屋内で雨天OK、お酒も飲めて、駐車場もあり。彦根〜近江八幡エリアからも来やすいです。","はつらつドーム、いいですよ。\n雨を気にせず、飲みながら、ゆっくり楽しめる。家族でもふらっとでも。"]},
+   {id:"shiga",label:"🌿 滋賀ネタ",prompt:"滋賀・琵琶湖・地域愛を絡めて。",tags:["#琵琶湖","#滋賀県","#地元"],
+    body:["滋賀って、ええとこです。\n琵琶湖があって、人があったかくて。その滋賀から、文化のごちゃまぜを発信できたら最高です。","琵琶湖のある滋賀で、ジャンルを超えたお祭りを。\n地元から面白いことを起こしたいんです。","滋賀の真ん中で、いろんな表現が混ざる日。\nなんかワクワクしませんか。"]},
+   {id:"casual",label:"💬 ひとこと",prompt:"自然な今日のひとことをLAKE VIBES関連で。",tags:["#日々のこと"],
+    body:["LAKE VIBES、今日もちょっとずつ前に進んでます。","本番に向けて、毎日いろいろ動いてます。\nまた報告しますね。","ふと、当日のステージを想像してニヤニヤしてました。"]}
+  ]
+ },
+
+ ryukyu:{
+  name:"🌺 琉球國祭り太鼓 滋賀支部",
+  context:`■ 団体: 琉球國祭り太鼓 滋賀支部（沖縄発祥の創作エイサー団体の滋賀支部）
+ジュニア(子ども)〜大人メンバー。新メンバー随時デビュー。体験・見学歓迎。
+■ 投稿の型: 「はいさい！」で始まることが多い。絵文字多め・あたたかい・元気。出演報告/次回告知が定番。
+■ 定番ハッシュタグ: #琉球國祭り太鼓 #琉球國祭り太鼓滋賀支部 #創作エイサー #滋賀県
+■ よく出る曲・文化: 鷲ぬ鳥節(縁起の良い沖縄民謡)、シーサー(獅子)に噛まれると健康、年中口説 ほか
+■ 連絡先(LAKE VIBESと同):ryukyu.shiga@gmail.com`,
+  tagBase:["#琉球國祭り太鼓","#琉球國祭り太鼓滋賀支部","#創作エイサー","#滋賀県"],
+  tagPool:["#エイサー","#太鼓","#沖縄","#ジュニア","#滋賀イベント","#沖縄文化","#習い事"],
+  personas:[
+   {emoji:"🌺",name:"公式アカ",short:"はいさい！",system:"琉球國祭り太鼓滋賀支部の公式アカウント。「はいさい！」で始め、元気で丁寧、絵文字多め。出演報告/告知の王道。",
+    voice:{open:["はいさい‼️\n琉球國祭り太鼓滋賀支部です☺️","はいさ〜い🌺\n琉球國祭り太鼓滋賀支部です！","はいさい！\n琉球國祭り太鼓滋賀支部です🥁"],close:["ぜひ見に来てくださいね👋✨","お越しお待ちしてます🌺","応援よろしくお願いします☺️","ありがとうございました🙇‍♀️💖"],emo:["🌺","🥁","✨","☀️","💖"]}},
+   {emoji:"🧒",name:"ジュニア応援",short:"成長目線",system:"子どもメンバーの成長を見守る温かい目線。ほっこり丁寧。デビューや頑張りを応援。",
+    voice:{open:["はいさい！","こんにちは🌷","今日はうれしい報告です☺️"],close:["これからの成長もお楽しみに💪","あたたかい応援お願いします🌸","みんなで見守ってくださいね☺️"],emo:["🌸","🧒","💪","🌷","✨"]}},
+   {emoji:"🥁",name:"メンバー",short:"等身大",system:"いちメンバーの一人称。演舞の感想や舞台裏の気持ちを等身大で。少しカジュアル。",
+    voice:{open:["この前のイベント、","舞台に立つたびに思うけど、","ひさしぶりの出演でした！"],close:["また舞台でお会いしましょう🥁","次もがんばります！","見てくれてありがとう✨"],emo:["🥁","✨","🔥","😆"]}}
+  ],
+  themes:[
+   {id:"report",label:"📣 出演報告",prompt:"イベント出演の報告。日付・会場・曲はメモを使って具体的に。お礼も。",tags:["#出演報告"],
+    body:["先日のイベントに出演してきました‼️\nたくさんの方に見ていただけて、メンバー一同とても嬉しかったです。","出演報告です☺️\n会場の熱気がすごくて、演舞にも力が入りました！\nお越しくださった皆様、ありがとうございました。","ステージに立たせていただきました🥁\n手拍子や声援、本当にありがとうございました！"]},
+   {id:"announce",label:"🗓️ 次回告知",prompt:"次回出演の告知。日付・会場・時間はメモを使う。見に来てね、で締める。",tags:["#告知","#イベント"],
+    body:["次回の出演が決まりました📣\n日時・会場はこちら👇（詳細はメモ参照）\nぜひ見に来てください！","お知らせです☺️\n次のステージでお会いできるのを楽しみにしています🌺","次回イベント告知です‼️\nお近くの方はぜひ、遊びに来てくださいね👋"]},
+   {id:"recruit",label:"🙌 メンバー募集",prompt:"メンバー・体験・見学募集。子どもも大人も歓迎の温かさ。",tags:["#メンバー募集","#体験","#習い事"],
+    body:["一緒にエイサーを踊る仲間を募集しています🥁\n年齢経験は問いません。体験・見学も大歓迎です☺️","「やってみたいな」がスタートでOK✨\n子どもも大人も、まずは気軽に見学に来てください🌺","新しい仲間、お待ちしています！\nエイサーで一緒に汗をかきませんか？😆"]},
+   {id:"debut",label:"🎉 新メンバー紹介",prompt:"新メンバーのデビュー紹介。名前や曲はメモを使う。あたたかく。",tags:["#新メンバー","#デビュー"],
+    body:["うれしいお知らせ🎊\n新しいメンバーがデビューしました！\nこれからの活躍をお楽しみに💪","新メンバーデビューの日でした☺️\n緊張しながらも堂々の演舞、立派でした🌸","またひとり、舞台デビュー🎉\nどんどん仲間が増えています！"]},
+   {id:"song",label:"🎶 曲・文化紹介",prompt:"沖縄の曲や文化(例:鷲ぬ鳥節、シーサー)の意味をやさしく紹介。",tags:["#沖縄文化","#エイサー"],
+    body:["今日は曲のご紹介🎶\n沖縄に伝わる縁起の良い唄で、聴くと元気が出ます。\n演舞でお届けできるのを楽しみにしています☺️","エイサーには沖縄の文化や祈りが込められています🌺\nそんな背景も感じてもらえたら嬉しいです。","シーサー（獅子）に噛まれると一年健康に過ごせる、という言い伝えがあります🦁✨\nぜひ噛まれにきてくださいね！"]},
+   {id:"thanks",label:"🙏 お礼",prompt:"来場・応援へのお礼。あたたかく丁寧に。",tags:["#感謝"],
+    body:["お越しくださった皆様、本当にありがとうございました🙇‍♀️💖\n皆さんの笑顔がメンバーの力になっています。","応援してくださる皆様へ。\nいつもありがとうございます☺️\nこれからも精一杯がんばります🥁","たくさんの拍手、ありがとうございました✨\nまた次の舞台でお会いしましょう！"]},
+   {id:"daily",label:"💬 練習/日常",prompt:"練習風景や日常のひとこと。等身大で。",tags:["#練習","#日々のこと"],
+    body:["今日も練習がんばりました🥁\n一歩ずつ、本番に向けて。","稽古の様子をちらり☺️\nメンバーみんな、いい顔してます✨","練習の積み重ねが、舞台のあの一瞬になります。\nコツコツいきます🔥"]}
+  ]
+ }
+};
+
+/* ====================================================================
+   ③ 状態（Driveに同期する中身）
+   state.proj[pid] = { extra:"追加コンテキスト", files:[{name,text}] }
+   state.drafts = [{id,proj,label,text,ts}]
+==================================================================== */
+let state={proj:{},drafts:[]};
+let curProj="lakevibes", selectedPersona=0, selectedTheme="", mode="instant";
+
+function ensureProj(pid){if(!state.proj[pid])state.proj[pid]={extra:"",files:[]};return state.proj[pid];}
+function P(){return PROJECTS[curProj];}
+
+/* ---- localStorage（オフライン保険）+ Drive 自動保存 ---- */
+function persistLocal(){try{localStorage.setItem("appstate",JSON.stringify(state));}catch(e){}}
+function loadLocal(){try{const s=JSON.parse(localStorage.getItem("appstate")||"null");if(s)state=s;}catch(e){}}
+let saveTimer=null;
+function touch(){persistLocal();if(accessToken){clearTimeout(saveTimer);saveTimer=setTimeout(driveSave,1200);}}
+
+/* ====================================================================
+   ④ 画面描画
+==================================================================== */
+function renderProjTabs(){
+  document.getElementById("projtabs").innerHTML=Object.keys(PROJECTS).map(pid=>
+    `<button class="projtab ${pid===curProj?'active':''}" onclick="selectProject('${pid}')">${PROJECTS[pid].name}</button>`).join("");
+}
+function renderPersonas(){
+  document.getElementById("personas").innerHTML=P().personas.map((p,i)=>
+    `<button class="persona-btn ${i===selectedPersona?'active':''}" onclick="selectPersona(${i})"><span class="persona-emoji">${p.emoji}</span><span class="persona-name">${p.name}</span><span class="persona-short">${p.short}</span></button>`).join("");
+}
+function renderThemes(){
+  if(!P().themes.find(t=>t.id===selectedTheme))selectedTheme=P().themes[0].id;
+  document.getElementById("themes").innerHTML=P().themes.map(t=>
+    `<button class="theme-btn ${t.id===selectedTheme?'selected':''}" onclick="selectTheme('${t.id}')">${t.label}</button>`).join("");
+}
+function renderProjData(){
+  const pr=ensureProj(curProj);
+  document.getElementById("extraCtx").value=pr.extra||"";
+  renderFiles();
+}
+function renderFiles(){
+  const pr=ensureProj(curProj);
+  document.getElementById("fileList").innerHTML=pr.files.map((f,i)=>
+    `<div class="fileitem"><span class="fn">📄 ${esc(f.name)}</span><span class="sz">${f.text.length}字</span><button onclick="fileToMemo(${i})">メモに入れる</button><button onclick="removeFile(${i})">✕</button></div>`).join("");
+}
+function renderDrafts(){
+  document.getElementById("draftCount").textContent=state.drafts.length;
+  document.getElementById("draftList").innerHTML=state.drafts.slice().reverse().map(d=>
+    `<div class="draftitem"><div class="dmeta"><span>${esc(projName(d.proj))} / ${esc(d.label)}</span><span>${new Date(d.ts).toLocaleString('ja-JP')}</span></div><div class="dtext">${esc(d.text)}</div><div class="drow"><button onclick="copyDraft('${d.id}')">コピー</button><button onclick="delDraft('${d.id}')">削除</button></div></div>`).join("")
+    || '<p class="tip">まだありません。生成して「💾 下書き保存」で貯められます。</p>';
+}
+function projName(pid){return PROJECTS[pid]?PROJECTS[pid].name:pid;}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));}
+
+/* ---- 選択操作 ---- */
+function selectProject(pid){curProj=pid;selectedPersona=0;
+  document.getElementById("memo").value="";              // 一時メモは持ち越さない（混在防止）
+  document.getElementById("outputWrap").style.display="none";lastOut="";
+  const cb=document.getElementById("ctxBox");if(cb)cb.style.display="none";
+  renderProjTabs();renderPersonas();renderThemes();renderProjData();}
+function selectPersona(i){selectedPersona=i;renderPersonas();}
+function selectTheme(id){selectedTheme=id;renderThemes();}
+function setMode(m){mode=m;[...document.querySelectorAll('.mode-btn')].forEach(b=>b.classList.toggle('active',b.dataset.mode===m));}
+function memoVal(){return document.getElementById("memo").value.trim();}
+
+/* ---- 追加コンテキスト編集 → 同期 ---- */
+document.addEventListener("input",e=>{if(e.target&&e.target.id==="extraCtx"){ensureProj(curProj).extra=e.target.value;touch();}});
+
+/* ---- ファイル取り込み ---- */
+function addFiles(fl){
+  const arr=[...fl].filter(f=>/\.(md|markdown|txt)$/i.test(f.name));let pending=arr.length;if(!pending)return;
+  const pr=ensureProj(curProj);
+  arr.forEach(f=>{const r=new FileReader();r.onload=()=>{pr.files.push({name:f.name,text:String(r.result).slice(0,100000)});if(--pending===0){touch();renderFiles();}};r.onerror=()=>{if(--pending===0){touch();renderFiles();}};r.readAsText(f);});
+}
+function removeFile(i){ensureProj(curProj).files.splice(i,1);touch();renderFiles();}
+function fileToMemo(i){const m=document.getElementById("memo");m.value=(m.value?m.value+"\n":"")+ensureProj(curProj).files[i].text.trim();}
+
+function fullContext(){
+  const pr=ensureProj(curProj);let c=P().context;
+  if(pr.extra&&pr.extra.trim())c+="\n\n■ 追加コンテキスト\n"+pr.extra.trim();
+  if(pr.files.length)c+="\n\n■ 追加ファイル\n"+pr.files.map(f=>`【${f.name}】\n${f.text.trim()}`).join("\n\n");
+  return c;
+}
+function toggleCtx(){const b=document.getElementById("ctxBox");const sh=b.style.display==="none";b.style.display=sh?"block":"none";if(sh)b.value=fullContext();}
+
+/* ====================================================================
+   ⑤ 生成
+==================================================================== */
+function buildTags(t){return [...new Set([...P().tagBase,...(t.tags||[]),...shuffle(P().tagPool).slice(0,2)])].slice(0,9).join(" ");}
+function buildInstant(){
+  const p=P().personas[selectedPersona],v=p.voice,t=P().themes.find(x=>x.id===selectedTheme);
+  const body=pick(t.body).replace(/\{D\}/g,daysLeft()),emo=pick(v.emo),memo=memoVal();
+  let lines=[pick(v.open),"",body+" "+emo];if(memo)lines.push(memo);
+  lines.push("",pick(v.close),"",buildTags(t));return lines.join("\n");
+}
+function buildClaude(){
+  const p=P().personas[selectedPersona],t=P().themes.find(x=>x.id===selectedTheme),memo=memoVal();
+  return `[Instagram投稿生成]
+
+キャラクター設定:
+${p.system}
+
+背景情報（必要な部分だけ自然に使って）:
+${fullContext()}
+
+投稿テーマ:
+${t.prompt.replace(/\{D\}/g,daysLeft())}${memo?"\n\n追加メモ: "+memo:""}
+
+出力ルール:
+- 投稿文のみ出力 / AI感(「ぜひ」「素晴らしい」多用)を避ける / 自然な揺らぎ
+- ハッシュタグは最後にまとめ、${P().tagBase.join(" ")} を必ず含める`;
+}
+let lastOut="",lastLabel="";
+function generate(){
+  const p=P().personas[selectedPersona];
+  const out=mode==="instant"?buildInstant():buildClaude();
+  lastOut=out;lastLabel=`${p.emoji}${p.name}/${P().themes.find(x=>x.id===selectedTheme).label}`;
+  document.getElementById("outputWrap").style.display="block";
+  document.getElementById("regenBtn").style.display="inline-block";
+  document.getElementById("outputLabel").textContent=mode==="instant"?`${p.emoji} ${p.name} — コピーして即投稿OK`:`${p.emoji} ${p.name} — Claudeに送ってください`;
+  document.getElementById("outputText").textContent=out;
+  const cc=document.getElementById("charCount"),n=out.length;
+  cc.textContent=`${n}文字`+(mode==="instant"?" / 上限2200":"");cc.classList.toggle("over",mode==="instant"&&n>2200);
+}
+function copyText(){navigator.clipboard.writeText(document.getElementById("outputText").textContent).then(()=>flash(".copy-btn","コピー","コピーしました"));}
+function flash(sel,a,b){const el=document.querySelector(sel);if(!el)return;el.textContent=b;setTimeout(()=>el.textContent=a,1500);}
+
+/* ---- 下書き ---- */
+function saveDraft(){if(!lastOut)return;state.drafts.push({id:"d"+Date.now(),proj:curProj,label:lastLabel,text:lastOut,ts:Date.now()});touch();renderDrafts();flash(".save-btn","💾 下書き保存","保存しました");}
+function copyDraft(id){const d=state.drafts.find(x=>x.id===id);if(d)navigator.clipboard.writeText(d.text);}
+function delDraft(id){state.drafts=state.drafts.filter(x=>x.id!==id);touch();renderDrafts();}
+
+/* ====================================================================
+   ⑥ Google Drive 同期（appDataFolder・最小権限）
+==================================================================== */
+const DRIVE_FILE="generator_state.json";
+const SCOPE="https://www.googleapis.com/auth/drive.appdata";
+let tokenClient=null,accessToken=null,driveFileId=null;
+
+function initGis(){
+  if(!window.google||!google.accounts||!google.accounts.oauth2){setTimeout(initGis,400);return;}
+  if(GOOGLE_CLIENT_ID.startsWith("PASTE_")){setStatus("Drive: クライアントID未設定（⚙Google設定）");return;}
+  tokenClient=google.accounts.oauth2.initTokenClient({client_id:GOOGLE_CLIENT_ID,scope:SCOPE,
+    callback:resp=>{if(resp&&resp.access_token){accessToken=resp.access_token;onSignedIn();}}});
+  setStatus("Drive: 未接続");
+}
+function signIn(){if(!tokenClient){initGis();if(!tokenClient){alert("クライアントIDを先に設定してください（⚙Google設定）");return;}}tokenClient.requestAccessToken({prompt:accessToken?"":"consent"});}
+function signOut(){if(accessToken&&google.accounts.oauth2)google.accounts.oauth2.revoke(accessToken,()=>{});accessToken=null;driveFileId=null;document.getElementById("signinBtn").style.display="inline-block";document.getElementById("syncBtn").style.display="none";document.getElementById("signoutBtn").style.display="none";setStatus("Drive: 未接続");}
+function onSignedIn(){document.getElementById("signinBtn").style.display="none";document.getElementById("syncBtn").style.display="inline-block";document.getElementById("signoutBtn").style.display="inline-block";setStatus("Drive: 接続中… 読込");driveLoad();}
+function setStatus(s){document.getElementById("syncStatus").innerHTML=s.replace(/接続済|同期済/,m=>"<b>"+m+"</b>");}
+
+async function dapi(url,opt){opt=opt||{};opt.headers=Object.assign({Authorization:"Bearer "+accessToken},opt.headers||{});const r=await fetch(url,opt);if(r.status===401){accessToken=null;setStatus("Drive: 再ログインしてください");throw new Error("401");}return r;}
+async function findFile(){const r=await dapi("https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q="+encodeURIComponent("name='"+DRIVE_FILE+"'")+"&fields=files(id,name)");const j=await r.json();return j.files&&j.files.length?j.files[0].id:null;}
+async function driveLoad(){
+  try{
+    driveFileId=await findFile();
+    if(driveFileId){const r=await dapi("https://www.googleapis.com/drive/v3/files/"+driveFileId+"?alt=media");const remote=await r.json();
+      if(remote&&remote.proj){state=remote;persistLocal();afterStateChange();setStatus("Drive: 同期済（読込完了）");}
+      else setStatus("Drive: 接続済（空）");
+    }else{setStatus("Drive: 接続済（新規）");await driveSave();}
+  }catch(e){setStatus("Drive: 読込エラー "+e.message);}
+}
+async function driveSave(){
+  if(!accessToken)return;
+  try{
+    setStatus("Drive: 保存中…");
+    const meta={name:DRIVE_FILE};if(!driveFileId)meta.parents=["appDataFolder"];
+    const boundary="genstate314159";
+    const body="--"+boundary+"\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n"+JSON.stringify(meta)+
+      "\r\n--"+boundary+"\r\nContent-Type: application/json\r\n\r\n"+JSON.stringify(state)+"\r\n--"+boundary+"--";
+    const url=driveFileId?("https://www.googleapis.com/upload/drive/v3/files/"+driveFileId+"?uploadType=multipart")
+                          :("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id");
+    const r=await dapi(url,{method:driveFileId?"PATCH":"POST",headers:{"Content-Type":"multipart/related; boundary="+boundary},body});
+    const j=await r.json();if(j.id)driveFileId=j.id;
+    setStatus("Drive: 同期済 "+new Date().toLocaleTimeString('ja-JP'));
+  }catch(e){setStatus("Drive: 保存エラー "+e.message);}
+}
+function syncNow(){if(accessToken)driveSave();else signIn();}
+
+/* ---- クライアントID 設定 ---- */
+function saveCid(){const v=document.getElementById("cidInput").value.trim();if(!v)return;localStorage.setItem("gcid",v);GOOGLE_CLIENT_ID=v;tokenClient=null;initGis();flash(".cid-input",""," ");document.getElementById("syncStatus").textContent="Drive: ID保存。ログインしてください";}
+
+/* ====================================================================
+   ⑦ 起動
+==================================================================== */
+function afterStateChange(){renderProjData();renderDrafts();}
+function initDrop(){
+  const drop=document.getElementById("drop"),inp=document.getElementById("fileInput");
+  drop.onclick=()=>inp.click();inp.onchange=e=>{addFiles(e.target.files);inp.value="";};
+  ["dragenter","dragover"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add("drag");}));
+  ["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove("drag");}));
+  drop.addEventListener("drop",e=>{if(e.dataTransfer&&e.dataTransfer.files)addFiles(e.dataTransfer.files);});
+  ["dragover","drop"].forEach(ev=>window.addEventListener(ev,e=>e.preventDefault()));
+}
+loadLocal();
+renderProjTabs();renderPersonas();renderThemes();renderProjData();renderDrafts();initDrop();
+document.getElementById("bottomNote").textContent="開催まで残り"+daysLeft()+"日（LAKE VIBES Vol.02 / 2026-10-18）";
+initGis();
+</script>
+</body>
+</html>
